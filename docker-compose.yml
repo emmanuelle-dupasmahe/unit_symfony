@@ -1,0 +1,81 @@
+services:
+  app:
+    build: .
+    container_name: symfony_app
+    working_dir: /var/www/html
+    volumes:
+      - ./app:/var/www/html # Code source persistant
+      - app_logs:/var/log/php # Logs PHP
+      - app_cache:/var/www/html/var # Cache et sessions Symfony
+    networks:
+      - symfony_network
+
+  webserver:
+    image: nginx:stable
+    container_name: symfony_webserver
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app:/var/www/html # Code source
+      - ./nginx:/etc/nginx/conf.d # Config Nginx
+      - nginx_logs:/var/log/nginx # Logs Nginx persistants
+    depends_on:
+      - app
+    networks:
+      - symfony_network
+
+  database:
+    image: mysql:8.0
+    container_name: symfony_db
+    environment:
+      MYSQL_ROOT_PASSWORD: mot_de_passe_securise
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: symfony
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql # Stocke les bases de données et relations internes
+    networks:
+      - symfony_network
+
+  adminer:
+    image: adminer
+    container_name: symfony_adminer
+    restart: always
+    ports:
+      - "8081:8080" # Adminer sera accessible sur http://localhost:8081
+    depends_on:
+      - database
+    networks:
+      - symfony_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: symfony_phpmyadmin
+    restart: always
+    ports:
+      - "8082:80" # phpMyAdmin sera accessible sur http://localhost:8082
+    environment:
+      PMA_HOST: symfony_db
+      MYSQL_ROOT_PASSWORD: mot_de_passe_securise
+      PMA_PMADB: phpmyadmin # Nom de la base de configuration
+      PMA_CONTROLUSER: symfony # Utilisateur qui gère les tables internes
+      PMA_CONTROLPASS: symfony # Mot de passe du user de contrôle
+    depends_on:
+      - database
+    networks:
+      - symfony_network
+    volumes:
+      - phpmyadmin_data:/var/lib/phpmyadmin # Volume pour les données internes
+
+networks:
+  symfony_network:
+    driver: bridge
+
+volumes:
+  db_data: # Pour MySQL
+  phpmyadmin_data: # Pour phpMyAdmin
+  app_logs: # Logs PHP-FPM
+  app_cache: # Cache, sessions Symfony
+  nginx_logs: # Logs Nginx persistants
