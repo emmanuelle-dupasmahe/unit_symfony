@@ -81,25 +81,6 @@ exit
 attention dans le Dockerfile : il faut changer FROM php:8.2-fpm en FROM php:8.3-fpm
 
 
-Welcome to
-Symfony 7
-
-    You are using Symfony 7.4.13 version
-    Your application is ready at:
-    /var/www/html/
-    You are seeing this page because the homepage URL is not configured and debug mode is enabled.
-
-sur localhost:8081 
-Authentification
-Système	
-Serveur	
-Utilisateur	
-Mot de passe	
-Base de données	
-
-Authentification permanente
-Adminer 5.4.2
-
 ## Captures d'écran
 
 
